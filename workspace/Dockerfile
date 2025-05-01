@@ -1231,12 +1231,12 @@ RUN if [ ${INSTALL_PYTHON} = true ]; then \
 ARG INSTALL_PYTHON3=false
 
 RUN if [ ${INSTALL_PYTHON3} = true ]; then \
-  apt-get -y install python3 python3-dev build-essential  \
-  && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py  \
-  && python3 get-pip.py  \
-  && rm get-pip.py  \
-  && python3 -m pip install --upgrade --force-reinstall pip  \
-  && python3 -m pip install --upgrade virtualenv \
+  apt-get -y install python3 python3-dev build-essential \
+  && curl https://bootstrap.pypa.io/pip/3.8/get-pip.py -o get-pip.py \
+  && python3 get-pip.py \
+  && rm get-pip.py \
+  && python3 -m pip install --upgrade --force-reinstall pip \
+  && python3 -m pip install --upgrade virtualenv  \
 ;fi
 
 ###########################################################################
