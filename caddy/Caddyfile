@@ -1,0 +1,16 @@
+# Docs: https://caddyserver.com/docs/caddyfile
+# Main Caddyfile - Imports configurations
+
+# Optional: Global options block
+# {
+#   email your-email@example.com # Set your email for Let's Encrypt (if using real domains)
+#   acme_ca https://acme-staging-v02.api.letsencrypt.org/directory # Use staging LE for testing
+# }
+
+# Import reusable snippets first (so they are defined before being used)
+import snippets/*.caddy
+
+# Import all site configurations from the sites directory
+import sites/*.caddy
+
+# You can add other global directives here if needed, outside of site blocks.

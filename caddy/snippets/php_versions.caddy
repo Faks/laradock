@@ -1,0 +1,45 @@
+# Caddy Snippets for PHP-FPM Versions
+# ------------------------------------
+# Defines reusable snippets for connecting to different PHP-FPM services
+# running in Laradock. Ensure the service names match your docker-compose.yml.
+
+# PHP 5.6
+(php_56) {
+    php_fastcgi php-fpm-5.6:9000
+}
+
+# PHP 7.4
+(php_74) {
+    php_fastcgi php-fpm-7.4:9000
+}
+
+# PHP 8.0
+(php_80) {
+    php_fastcgi php-fpm-8.0:9000
+}
+
+# PHP 8.1
+(php_81) {
+    php_fastcgi php-fpm-8.1:9000
+}
+
+# PHP 8.2
+(php_82) {
+    php_fastcgi php-fpm-8.2:9000
+}
+
+# PHP 8.3
+(php_83) {
+    php_fastcgi php-fpm:9000
+}
+
+# PHP 8.4
+(php_84) {
+    php_fastcgi php-fpm-8.4:9000
+}
+
+# Note: If you also have a distinct service named 'php-fpm-8.3' in docker-compose.yml
+# that you need to target separately, you might need to create another snippet
+# with a different name, e.g., (php_83_alt), or adjust the service name above
+# if 'php-fpm' actually maps to a different version. Based on your input,
+# this configuration maps (php_83) to the service named 'php-fpm'.

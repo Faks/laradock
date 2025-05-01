@@ -1,0 +1,45 @@
+# Common Caddy settings for Laravel Applications
+(laravel_common) {
+    # Enable compression
+    encode zstd gzip
+
+    # Serve static files directly from the public root
+    file_server
+
+    # Standard Laravel front-controller pattern
+    # Route requests for non-existent files/directories to index.php
+    try_files {path} {path}/ /index.php?{query}
+
+    # Block access to hidden files/directories (like .env, .git)
+    @hidden path_regexp /\/\..*
+    route @hidden {
+        abort
+    }
+
+    # Set max request body size (matches Nginx client_max_body_size 128M;)
+    request_body {
+        max_size 128m
+    }
+
+    # Add common security headers
+    header {
+        # Enable HTTP Strict Transport Security (HSTS)
+        # Tells browsers to always connect via HTTPS (only enable if HTTPS is forced/working)
+        Strict-Transport-Security "max-age=31536000;"
+
+        # Prevent Clickjacking by disallowing the site to be rendered in iframes from other origins
+        X-Frame-Options "SAMEORIGIN"
+
+        # Prevent browsers from MIME-sniffing the content-type away from the declared one
+        X-Content-Type-Options "nosniff"
+
+        # Enable browser's built-in Cross-site scripting (XSS) filter (mostly legacy, modern CSP is better)
+        X-XSS-Protection "1; mode=block"
+
+        # Control how much referrer information is sent with requests
+        Referrer-Policy "strict-origin-when-cross-origin"
+
+        # Remove the default "Server: Caddy" header (minor security obfuscation)
+        -Server
+    }
+}
