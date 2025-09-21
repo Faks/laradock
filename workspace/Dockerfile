@@ -49,7 +49,7 @@ ENV PGID ${PGID}
 
 # always run apt update when start and after add new source list, then clean up at end.
 RUN set -xe; \
-    apt-get update -yqq && \
+    apt-get update -yqq --allow-releaseinfo-change && \
     pecl channel-update pecl.php.net && \
     groupadd -g ${PGID} laradock && \
     useradd -l -u ${PUID} -g laradock -m laradock -G docker_env && \
@@ -1231,12 +1231,12 @@ RUN if [ ${INSTALL_PYTHON} = true ]; then \
 ARG INSTALL_PYTHON3=false
 
 RUN if [ ${INSTALL_PYTHON3} = true ]; then \
-  apt-get -y install python3 python3-dev build-essential  \
-  && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py  \
-  && python3 get-pip.py  \
-  && rm get-pip.py  \
-  && python3 -m pip install --upgrade --force-reinstall pip  \
-  && python3 -m pip install --upgrade virtualenv \
+  apt-get -y install python3 python3-dev build-essential \
+  && curl https://bootstrap.pypa.io/pip/3.8/get-pip.py -o get-pip.py \
+  && python3 get-pip.py \
+  && rm get-pip.py \
+  && python3 -m pip install --upgrade --force-reinstall pip \
+  && python3 -m pip install --upgrade virtualenv  \
 ;fi
 
 ###########################################################################
@@ -1927,15 +1927,16 @@ USER root
 
 RUN set -eux \
     # Add the "PHP 8" ppa
+    && apt-get update \
     && apt-get install -y software-properties-common \
     && add-apt-repository -y ppa:ondrej/php \
-    #
+    \
     #--------------------------------------------------------------------------
     # Software's Installation
     #--------------------------------------------------------------------------
-    #
-    && echo 'DPkg::options { "--force-confdef"; };' >> /etc/apt/apt.conf \
-    # Install "PHP Extentions", "libraries", "Software's"
+    \
+    && echo 'DPkg::options { "--force-confdef"; };' > /etc/apt/apt.conf.d/force-confdef \
+    # Install "PHP Extensions", "libraries", "Software"
     && apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --allow-downgrades --allow-remove-essential \
@@ -1957,11 +1958,12 @@ RUN set -eux \
         php5.6-memcached \
         php5.6-gd \
         php5.6-dev \
-        php5.6-xmlrpc  \
+        php5.6-xmlrpc \
         php5.6-imap \
         php5.6-opcache \
         php5.6-soap \
         php5.6-imagick \
+        \
         php7.4-cli \
         php7.4-common \
         php7.4-curl \
@@ -1978,15 +1980,15 @@ RUN set -eux \
         php7.4-memcached \
         php7.4-gd \
         php7.4-dev \
-        php7.4-xmlrpc  \
-        php7.4-imap  \
-        php7.4-opcache  \
-        php7.4-soap  \
-        php7.4-imagick  \
-        php7.4-redis  \
-        php7.4-zm \
-        php7.4-apcu  \
-        php7.4-mailparse  \
+        php7.4-xmlrpc \
+        php7.4-imap \
+        php7.4-opcache \
+        php7.4-soap \
+        php7.4-imagick \
+        php7.4-redis \
+        php7.4-zmq \
+        php7.4-apcu \
+        php7.4-mailparse \
         php7.4-pspell \
         php7.4-xsl \
         php7.4-psr \
@@ -1994,7 +1996,8 @@ RUN set -eux \
         php7.4-snmp \
         php7.4-uuid \
         php7.4-yaml \
-        php7.4-bz2  \
+        php7.4-bz2 \
+        \
         php8.0-cli \
         php8.0-common \
         php8.0-curl \
@@ -2027,6 +2030,7 @@ RUN set -eux \
         php8.0-yaml \
         php8.0-bz2 \
         php8.0-soap \
+        \
         php8.1-amqp \
         php8.1-igbinary \
         php8.1-redis \
@@ -2045,6 +2049,7 @@ RUN set -eux \
         php8.1-yaml \
         php8.1-bz2 \
         php8.1-soap \
+        \
         php8.2-cli \
         php8.2-common \
         php8.2-curl \
@@ -2063,7 +2068,6 @@ RUN set -eux \
         php8.2-amqp \
         php8.2-igbinary \
         php8.2-redis \
-        php8.2-sqlite3 \
         php8.2-zmq \
         php8.2-apcu \
         php8.2-imagick \
@@ -2077,27 +2081,62 @@ RUN set -eux \
         php8.2-yaml \
         php8.2-bz2 \
         php8.2-soap \
-        php8.3-mysql  \
-        php8.3-sqlite3  \
-        php8.3-xml \
+        \
         php8.3-cli \
-        php8.3-pspell  \
-        php8.3-xsl  \
-        php8.3-common  \
-        php8.3-imap  \
-        php8.3-mbstring  \
-        php8.3-tidy  \
+        php8.3-common \
+        php8.3-curl \
+        php8.3-intl \
+        php8.3-xml \
+        php8.3-mbstring \
+        php8.3-mysql \
+        php8.3-pgsql \
+        php8.3-sqlite3 \
+        php8.3-zip \
         php8.3-bcmath \
-        php8.3-curl  \
+        php8.3-memcached \
         php8.3-gd \
-        php8.3-opcache  \
-        php8.3-snmp \
-        php8.3-bz2  \
-        php8.3-intl  \
-        php8.3-pgsql  \
-        php8.3-soap  \
-        php8.3-zip  \
         php8.3-dev \
+        php8.3-imagick \
+        php8.3-pspell \
+        php8.3-xsl \
+        php8.3-imap \
+        php8.3-tidy \
+        php8.3-opcache \
+        php8.3-snmp \
+        php8.3-bz2 \
+        \
+        php8.4-cli \
+        php8.4-common \
+        php8.4-curl \
+        php8.4-intl \
+        php8.4-xml \
+        php8.4-mbstring \
+        php8.4-mysql \
+        php8.4-pgsql \
+        php8.4-sqlite3 \
+        php8.4-zip \
+        php8.4-bcmath \
+        php8.4-memcached \
+        php8.4-gd \
+        php8.4-dev \
+        php8.4-amqp \
+        php8.4-igbinary \
+        php8.4-redis \
+        php8.4-zmq \
+        php8.4-apcu \
+        php8.4-imagick \
+        php8.4-mailparse \
+        php8.4-pspell \
+        php8.4-xsl \
+        php8.4-imap \
+        php8.4-tidy \
+        php8.4-opcache \
+        php8.4-snmp \
+        php8.4-uuid \
+        php8.4-yaml \
+        php8.4-bz2 \
+        php8.4-soap \
+        \
         pkg-config \
         libcurl4-openssl-dev \
         libedit-dev \
@@ -2112,10 +2151,11 @@ RUN set -eux \
         vim \
         nano \
         tree \
-        unzip  \
-        php-pear  \
+        unzip \
+        php-pear \
         postgresql-client \
-    && apt-get clean
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 
 COPY ./phpset.sh /home/laradock/phpset.sh
