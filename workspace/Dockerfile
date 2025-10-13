@@ -68,28 +68,27 @@ RUN set -xe; \
       useradd -l -u ${PUID} -g laradock -m laradock -G docker_env; \
     fi; \
     usermod -p "*" laradock -s /bin/bash && \
-	  echo 'laradock:laradock' | chpasswd  && \
+    echo 'laradock:laradock' | chpasswd  && \
     echo 'laradock ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers  && \
     apt-get install -yqq \
       apt-utils \
-      #
+      \
       #--------------------------------------------------------------------------
       # Mandatory Software's Installation
       #--------------------------------------------------------------------------
-      #
+      \
       # Mandatory Software's such as ("php-cli", "git", "vim", ....) are
       # installed on the base image 'laradock/workspace' image. If you want
       # to add more Software's or remove existing one, you need to edit the
       # base image (https://github.com/Laradock/workspace).
-      #
+      \
       # next lines are here because there is no auto build on dockerhub see https://github.com/laradock/laradock/pull/1903#issuecomment-463142846
       libzip-dev zip unzip \
       # Install the zip extension
       php${LARADOCK_PHP_VERSION}-zip \
       # nasm
       nasm && \
-      php -m | grep -q 'zip'
-
+      php -m | grep -q 'zip' && \
     if [ ${WORKSPACE_ALLOW_RELEASE_INFO_CHANGE} = true ]; then \
       APT_GET_UPDATE_OPTIONS="--allow-releaseinfo-change"; \
     else \
@@ -102,7 +101,7 @@ RUN set -xe; \
     else \
       groupadd -g ${PGID} laradock; \
       useradd -l -u ${PUID} -g laradock -m laradock -G docker_env; \
-    fi; \
+    fi;
 
 #
 #--------------------------------------------------------------------------
