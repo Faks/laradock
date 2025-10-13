@@ -53,21 +53,22 @@ ENV WORKSPACE_ALLOW_RELEASE_INFO_CHANGE ${WORKSPACE_ALLOW_RELEASE_INFO_CHANGE}
 
 # always run apt update when start and after add new source list, then clean up at end.
 RUN set -xe; \
-    if [ ${WORKSPACE_ALLOW_RELEASE_INFO_CHANGE} = true ]; then \
+    if [ "${WORKSPACE_ALLOW_RELEASE_INFO_CHANGE}" = "true" ]; then \
       APT_GET_UPDATE_OPTIONS="--allow-releaseinfo-change"; \
     else \
       APT_GET_UPDATE_OPTIONS=""; \
     fi; \
     apt-get update -yqq ${APT_GET_UPDATE_OPTIONS} && \
     pecl channel-update pecl.php.net && \
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] && [ $(php -r "echo PHP_MINOR_VERSION;") != "0" ]; then \
-      groupmod --new-name laradock ubuntu; \
-      usermod --login laradock ubuntu --move-home --home /home/laradock; \
+    if [ "$(php -r "echo PHP_MAJOR_VERSION;")" = "8" ] && [ "$(php -r "echo PHP_MINOR_VERSION;")" != "0" ]; then \
+      # Rename only if 'ubuntu' group/user exist
+      if getent group ubuntu >/dev/null 2>&1; then groupmod -n laradock ubuntu; fi; \
+      if id -u ubuntu >/dev/null 2>&1; then usermod --login laradock ubuntu --move-home --home /home/laradock; fi; \
     else \
-      groupadd -g ${PGID} laradock; \
-      useradd -l -u ${PUID} -g laradock -m laradock -G docker_env; \
+      getent group laradock >/dev/null 2>&1 || groupadd -g ${PGID} laradock; \
+      id -u laradock   >/dev/null 2>&1 || useradd -l -u ${PUID} -g laradock -m laradock -G docker_env; \
     fi; \
-    usermod -p "*" laradock -s /bin/bash && \
+    if id -u laradock >/dev/null 2>&1; then usermod -p "*" laradock -s /bin/bash; fi; \
     echo 'laradock:laradock' | chpasswd  && \
     echo 'laradock ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers  && \
     apt-get install -yqq \
@@ -89,18 +90,19 @@ RUN set -xe; \
       # nasm
       nasm && \
       php -m | grep -q 'zip' && \
-    if [ ${WORKSPACE_ALLOW_RELEASE_INFO_CHANGE} = true ]; then \
+    if [ "${WORKSPACE_ALLOW_RELEASE_INFO_CHANGE}" = "true" ]; then \
       APT_GET_UPDATE_OPTIONS="--allow-releaseinfo-change"; \
     else \
       APT_GET_UPDATE_OPTIONS=""; \
     fi; \
     apt-get update -yqq ${APT_GET_UPDATE_OPTIONS} && \
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] && [ $(php -r "echo PHP_MINOR_VERSION;") != "0" ]; then \
-      groupmod --new-name laradock ubuntu; \
-      usermod --login laradock ubuntu --move-home --home /home/laradock; \
+    if [ "$(php -r "echo PHP_MAJOR_VERSION;")" = "8" ] && [ "$(php -r "echo PHP_MINOR_VERSION;")" != "0" ]; then \
+      # Second pass: still guard existence before rename/move
+      if getent group ubuntu >/dev/null 2>&1; then groupmod -n laradock ubuntu; fi; \
+      if id -u ubuntu >/dev/null 2>&1; then usermod --login laradock ubuntu --move-home --home /home/laradock; fi; \
     else \
-      groupadd -g ${PGID} laradock; \
-      useradd -l -u ${PUID} -g laradock -m laradock -G docker_env; \
+      getent group laradock >/dev/null 2>&1 || groupadd -g ${PGID} laradock; \
+      id -u laradock   >/dev/null 2>&1 || useradd -l -u ${PUID} -g laradock -m laradock -G docker_env; \
     fi;
 
 #
