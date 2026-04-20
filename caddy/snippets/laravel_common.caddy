@@ -1,45 +1,68 @@
-# Common Caddy settings for Laravel Applications
+# Common Caddy settings for Laravel Applications with enhanced security and performance
 (laravel_common) {
-    # Enable compression
+    # Enable compression using zstd and gzip for faster content delivery
     encode zstd gzip
 
-    # Serve static files directly from the public root
+    # Serve static files directly from the public root directory
     file_server
 
     # Standard Laravel front-controller pattern
-    # Route requests for non-existent files/directories to index.php
+    # Try to serve the requested file or directory, otherwise route to index.php with query string
     try_files {path} {path}/ /index.php?{query}
 
-    # Block access to hidden files/directories (like .env, .git)
-    @hidden path_regexp /\/\..*
+    # Restrict access to sensitive files and directories to prevent exposure
+    @forbidden {
+        path /.env                # Block access to environment configuration file
+        path /storage/*           # Block access to storage directory contents
+        path /vendor/*            # Block access to vendor directory contents
+        path /.git/*              # Block access to Git repository files
+        path /.htaccess           # Block access to Apache config files
+        path /composer.json       # Block access to composer.json file
+        path /composer.lock       # Block access to composer.lock file
+    }
+    # Respond with HTTP 403 Forbidden for any requests matching @forbidden
+    respond @forbidden 403
+
+    # Block access to hidden files or directories (starting with a dot) anywhere in the path
+    @hidden path_regexp hidden ^\.
     route @hidden {
-        abort
+        abort                   # Abort the request with a 404 Not Found
     }
 
-    # Set max request body size (matches Nginx client_max_body_size 128M;)
+    # Cache static assets aggressively for better performance
+    @static {
+        path_regexp static \.(css|js|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$
+    }
+    # Add Cache-Control header to static assets for long-term caching and immutability
+    header @static Cache-Control "public, max-age=31536000, immutable"
+
+    # Limit the maximum size of the request body to 128 megabytes (matches PHP limits)
     request_body {
-        max_size 128m
+        max_size 128MB
     }
 
-    # Add common security headers
+    # Add common security headers to all responses
     header {
         # Enable HTTP Strict Transport Security (HSTS)
-        # Tells browsers to always connect via HTTPS (only enable if HTTPS is forced/working)
-        Strict-Transport-Security "max-age=31536000;"
+        # Instruct browsers to always use HTTPS for one year, including subdomains, and preload list
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
-        # Prevent Clickjacking by disallowing the site to be rendered in iframes from other origins
+        # Prevent Clickjacking by allowing framing only from the same origin
         X-Frame-Options "SAMEORIGIN"
 
-        # Prevent browsers from MIME-sniffing the content-type away from the declared one
+        # Prevent MIME type sniffing to reduce exposure to drive-by download attacks
         X-Content-Type-Options "nosniff"
 
-        # Enable browser's built-in Cross-site scripting (XSS) filter (mostly legacy, modern CSP is better)
+        # Enable legacy XSS protection in browsers (mostly superseded by CSP)
         X-XSS-Protection "1; mode=block"
 
-        # Control how much referrer information is sent with requests
+        # Control referrer information sent with requests for privacy
         Referrer-Policy "strict-origin-when-cross-origin"
 
-        # Remove the default "Server: Caddy" header (minor security obfuscation)
+        # Define a basic Content Security Policy to restrict sources of content and scripts
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+
+        # Remove the default "Server: Caddy" header for minor security through obscurity
         -Server
     }
 }

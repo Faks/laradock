@@ -1,0 +1,15 @@
+# Caddy Snippets for LOG
+# ----------------------------------------------------------------------
+
+(log_common) {
+    log {
+        output file /var/log/caddy/{args[0]}/{args[1]}.access.log {
+            roll_size 10mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format json {
+            time_format "iso8601"
+        }
+    }
+}

@@ -1,0 +1,48 @@
+# Caddy Snippets for production PHP-FPM Versions
+# ----------------------------------------------------------------------
+# Defines reusable snippets for connecting to different PHP-FPM services
+
+# PHP 5.6
+(php_56_production) {
+    php_fastcgi php-fpm-56-production:9000
+}
+
+# PHP 7.4
+(php_74_production) {
+    php_fastcgi php-fpm-74-production:9000
+}
+
+# PHP 8.0
+(php_80_production) {
+    php_fastcgi php-fpm-80-production:9000
+}
+
+# PHP 8.1
+(php_81_production) {
+    php_fastcgi php-fpm-81-production:9000
+}
+
+# PHP 8.2
+(php_82_production) {
+    php_fastcgi php-fpm-82-production:9000
+}
+
+# PHP 8.3
+(php_83_production) {
+    php_fastcgi php-fpm-83-production:9000
+}
+
+# PHP 8.4
+(php_84_production) {
+    php_fastcgi php-fpm-84-production:9000
+}
+
+# PHP 8.5
+(php_85_production) {
+    php_fastcgi php-fpm-85-production:9000
+}
+
+# PHP 8.6
+(php_86_production) {
+    php_fastcgi php-fpm-86-production:9000
+}

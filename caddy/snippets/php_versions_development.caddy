@@ -1,0 +1,48 @@
+# Caddy Snippets for DEVELOPMENT PHP-FPM Versions
+# ----------------------------------------------------------------------
+# Defines reusable snippets for connecting to different PHP-FPM services
+
+# PHP 5.6
+(php_56_development) {
+    php_fastcgi php-fpm-56-development:9000
+}
+
+# PHP 7.4
+(php_74_development) {
+    php_fastcgi php-fpm-74-development:9000
+}
+
+# PHP 8.0
+(php_80_development) {
+    php_fastcgi php-fpm-80-development:9000
+}
+
+# PHP 8.1
+(php_81_development) {
+    php_fastcgi php-fpm-81-development:9000
+}
+
+# PHP 8.2
+(php_82_development) {
+    php_fastcgi php-fpm-82-development:9000
+}
+
+# PHP 8.3
+(php_83_development) {
+    php_fastcgi php-fpm-83-development:9000
+}
+
+# PHP 8.4
+(php_84_development) {
+    php_fastcgi php-fpm-84-development:9000
+}
+
+# PHP 8.5
+(php_85_development) {
+    php_fastcgi php-fpm-85-development:9000
+}
+
+# PHP 8.6
+(php_86_development) {
+    php_fastcgi php-fpm-86-development:9000
+}
