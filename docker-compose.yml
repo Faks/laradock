@@ -325,9 +325,9 @@ services:
       - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     ports:
-      - "8400:9000"
+      - "8500:9000"
     expose:
-      - "8400"
+      - "8500"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     environment:
