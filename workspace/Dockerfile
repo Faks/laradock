@@ -2187,13 +2187,11 @@ RUN set -eux \
         php8.5-xsl \
         php8.5-imap \
         php8.5-tidy \
-        php8.5-opcache \
         php8.5-snmp \
         php8.5-uuid \
         php8.5-yaml \
         php8.5-bz2 \
         php8.5-soap \
-        \
         pkg-config \
         libcurl4-openssl-dev \
         libedit-dev \
