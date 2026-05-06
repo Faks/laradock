@@ -64,7 +64,7 @@ x-environment: &php-fpm-environment
   INSTALL_MAILPARSE: ${PHP_FPM_INSTALL_MAILPARSE}
   INSTALL_PCNTL: ${PHP_FPM_INSTALL_PCNTL}
   ADDITIONAL_LOCALES: ${PHP_FPM_ADDITIONAL_LOCALES}
-  INSTALL_FFMPEG: ${PHP_FPM_FFMPEG}/
+  INSTALL_FFMPEG: ${PHP_FPM_FFMPEG}
   INSTALL_AUDIOWAVEFORM: ${PHP_FPM_AUDIOWAVEFORM}
   INSTALL_WKHTMLTOPDF: ${PHP_FPM_INSTALL_WKHTMLTOPDF}
   WKHTMLTOPDF_VERSION: ${PHP_FPM_WKHTMLTOPDF_VERSION}
@@ -322,13 +322,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ./php-fpm/php8.4.ini:/usr/local/etc/php/php.ini
       - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
-    ports:
-      - "8500:9000"
-    expose:
-      - "8500"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     environment:
@@ -346,13 +341,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ./php-fpm/php8.4.ini:/usr/local/etc/php/php.ini
       - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
-    ports:
-      - "8400:9000"
-    expose:
-      - "8400"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     environment:
@@ -370,13 +360,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ./php-fpm/php8.3.ini:/usr/local/etc/php/php.ini
       - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
-    ports:
-      - "8300:9000"
-    expose:
-      - "8300"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     environment:
@@ -394,13 +379,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ./php-fpm/php8.2.ini:/usr/local/etc/php/php.ini
       - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
-    ports:
-      - "8200:9000"
-    expose:
-      - "8200"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     environment:
@@ -418,13 +398,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ./php-fpm/php8.1.ini:/usr/local/etc/php/php.ini
       - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
-    ports:
-      - "8100:9000"
-    expose:
-      - "8100"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     environment:
@@ -442,13 +417,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ./php-fpm/php8.0.ini:/usr/local/etc/php/php.ini
       - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
-    ports:
-      - "8000:9000"
-    expose:
-      - "8000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     environment:
@@ -466,13 +436,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ./php-fpm/php7.4.ini:/usr/local/etc/php/php.ini
       - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
-    ports:
-      - "7400:9000"
-    expose:
-      - "7400"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     environment:
@@ -490,13 +455,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ./php-fpm/php5.6.ini:/usr/local/etc/php/php.ini
       - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
-    ports:
-      - "5600:9000"
-    expose:
-      - "5600"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     environment:
@@ -978,7 +938,7 @@ services:
     links:
       - postgres
     environment:
-      - POSTGRES_HOST={POSTGRES_HOST}
+      - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
