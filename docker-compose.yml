@@ -317,6 +317,7 @@ services:
   ### PHP-FPM ##############################################
   php-fpm-85-development:
     image: laradock/php-fpm:latest-8.5
+    container_name: php-fpm-85-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -340,6 +341,7 @@ services:
       - docker-in-docker
   php-fpm-84-development:
     image: laradock/php-fpm:latest-8.4
+    container_name: php-fpm-84-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -363,6 +365,7 @@ services:
       - docker-in-docker
   php-fpm-83-development:
     image: laradock/php-fpm:latest-8.3
+    container_name: php-fpm-83-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -386,6 +389,7 @@ services:
       - docker-in-docker
   php-fpm-82-development:
     image: laradock/php-fpm:latest-8.2
+    container_name: php-fpm-82-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -409,6 +413,7 @@ services:
       - docker-in-docker
   php-fpm-81-development:
     image: laradock/php-fpm:latest-8.1
+    container_name: php-fpm-81-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -432,6 +437,7 @@ services:
       - docker-in-docker
   php-fpm-80-development:
     image: laradock/php-fpm:latest-8.0
+    container_name: php-fpm-80-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -455,6 +461,7 @@ services:
       - docker-in-docker
   php-fpm-74-development:
     image: laradock/php-fpm:latest-7.4
+    container_name: php-fpm-74-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -478,6 +485,7 @@ services:
       - docker-in-docker
   php-fpm-56-development:
     image: laradock/php-fpm:latest-5.6
+    container_name: php-fpm-56-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
