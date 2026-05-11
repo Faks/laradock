@@ -316,13 +316,13 @@ services:
 
   ### PHP-FPM ##############################################
   php-fpm-85-development:
-    image: laradock/php-fpm:latest-8.5
+    image: shinsenter/php:dev-8.5-fpm-alpine
     container_name: php-fpm-85-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -335,13 +335,13 @@ services:
     links:
       - docker-in-docker
   php-fpm-84-development:
-    image: laradock/php-fpm:latest-8.4
+    image: shinsenter/php:dev-8.4-fpm-alpine
     container_name: php-fpm-84-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -354,13 +354,13 @@ services:
     links:
       - docker-in-docker
   php-fpm-83-development:
-    image: laradock/php-fpm:latest-8.3
+    image: shinsenter/php:dev-8.3-fpm-alpine
     container_name: php-fpm-83-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -373,13 +373,13 @@ services:
     links:
       - docker-in-docker
   php-fpm-82-development:
-    image: laradock/php-fpm:latest-8.2
+    image: shinsenter/php:dev-8.2-fpm-alpine
     container_name: php-fpm-82-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -392,13 +392,13 @@ services:
     links:
       - docker-in-docker
   php-fpm-81-development:
-    image: laradock/php-fpm:latest-8.1
+    image: shinsenter/php:dev-8.1-fpm-alpine
     container_name: php-fpm-81-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -411,13 +411,13 @@ services:
     links:
       - docker-in-docker
   php-fpm-80-development:
-    image: laradock/php-fpm:latest-8.0
+    image: shinsenter/php:dev-8.0-fpm-alpine
     container_name: php-fpm-80-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -430,13 +430,13 @@ services:
     links:
       - docker-in-docker
   php-fpm-74-development:
-    image: laradock/php-fpm:latest-7.4
+    image: shinsenter/php:dev-7.4-fpm-alpine
     container_name: php-fpm-74-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -449,13 +449,13 @@ services:
     links:
       - docker-in-docker
   php-fpm-56-development:
-    image: laradock/php-fpm:latest-5.6
+    image: shinsenter/php:dev-5.6-fpm
     container_name: php-fpm-56-development
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
