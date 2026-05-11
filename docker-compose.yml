@@ -322,7 +322,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -341,7 +341,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -360,7 +360,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -379,7 +379,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -398,7 +398,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -417,7 +417,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -436,7 +436,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -455,7 +455,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}/html${APP_CODE_CONTAINER_FLAG}
+      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
       - docker-in-docker:/certs/client
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
