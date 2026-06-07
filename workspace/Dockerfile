@@ -47,34 +47,63 @@ ENV PUID ${PUID}
 ARG PGID=1000
 ENV PGID ${PGID}
 
+# Set apt-get options:
+ARG WORKSPACE_ALLOW_RELEASE_INFO_CHANGE=false
+ENV WORKSPACE_ALLOW_RELEASE_INFO_CHANGE ${WORKSPACE_ALLOW_RELEASE_INFO_CHANGE}
+
 # always run apt update when start and after add new source list, then clean up at end.
 RUN set -xe; \
-    apt-get update -yqq --allow-releaseinfo-change && \
+    if [ "${WORKSPACE_ALLOW_RELEASE_INFO_CHANGE}" = "true" ]; then \
+      APT_GET_UPDATE_OPTIONS="--allow-releaseinfo-change"; \
+    else \
+      APT_GET_UPDATE_OPTIONS=""; \
+    fi; \
+    apt-get update -yqq ${APT_GET_UPDATE_OPTIONS} && \
     pecl channel-update pecl.php.net && \
-    groupadd -g ${PGID} laradock && \
-    useradd -l -u ${PUID} -g laradock -m laradock -G docker_env && \
-    usermod -p "*" laradock -s /bin/bash && \
+    if [ "$(php -r "echo PHP_MAJOR_VERSION;")" = "8" ] && [ "$(php -r "echo PHP_MINOR_VERSION;")" != "0" ]; then \
+      # Rename only if 'ubuntu' group/user exist
+      if getent group ubuntu >/dev/null 2>&1; then groupmod -n laradock ubuntu; fi; \
+      if id -u ubuntu >/dev/null 2>&1; then usermod --login laradock ubuntu --move-home --home /home/laradock; fi; \
+    else \
+      getent group laradock >/dev/null 2>&1 || groupadd -g ${PGID} laradock; \
+      id -u laradock   >/dev/null 2>&1 || useradd -l -u ${PUID} -g laradock -m laradock -G docker_env; \
+    fi; \
+    if id -u laradock >/dev/null 2>&1; then usermod -p "*" laradock -s /bin/bash; fi; \
     echo 'laradock:laradock' | chpasswd  && \
     echo 'laradock ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers  && \
     apt-get install -yqq \
       apt-utils \
-      #
+      \
       #--------------------------------------------------------------------------
       # Mandatory Software's Installation
       #--------------------------------------------------------------------------
-      #
+      \
       # Mandatory Software's such as ("php-cli", "git", "vim", ....) are
       # installed on the base image 'laradock/workspace' image. If you want
       # to add more Software's or remove existing one, you need to edit the
       # base image (https://github.com/Laradock/workspace).
-      #
+      \
       # next lines are here because there is no auto build on dockerhub see https://github.com/laradock/laradock/pull/1903#issuecomment-463142846
       libzip-dev zip unzip \
       # Install the zip extension
       php${LARADOCK_PHP_VERSION}-zip \
       # nasm
       nasm && \
-      php -m | grep -q 'zip'
+      php -m | grep -q 'zip' && \
+    if [ "${WORKSPACE_ALLOW_RELEASE_INFO_CHANGE}" = "true" ]; then \
+      APT_GET_UPDATE_OPTIONS="--allow-releaseinfo-change"; \
+    else \
+      APT_GET_UPDATE_OPTIONS=""; \
+    fi; \
+    apt-get update -yqq ${APT_GET_UPDATE_OPTIONS} && \
+    if [ "$(php -r "echo PHP_MAJOR_VERSION;")" = "8" ] && [ "$(php -r "echo PHP_MINOR_VERSION;")" != "0" ]; then \
+      # Second pass: still guard existence before rename/move
+      if getent group ubuntu >/dev/null 2>&1; then groupmod -n laradock ubuntu; fi; \
+      if id -u ubuntu >/dev/null 2>&1; then usermod --login laradock ubuntu --move-home --home /home/laradock; fi; \
+    else \
+      getent group laradock >/dev/null 2>&1 || groupadd -g ${PGID} laradock; \
+      id -u laradock   >/dev/null 2>&1 || useradd -l -u ${PUID} -g laradock -m laradock -G docker_env; \
+    fi;
 
 #
 #--------------------------------------------------------------------------
@@ -112,14 +141,14 @@ RUN sed -i 's/\r//' /root/aliases.sh && \
     echo "" >> ~/.bashrc && \
     echo "# Load Custom Aliases" >> ~/.bashrc && \
     echo "source ~/aliases.sh" >> ~/.bashrc && \
-	  echo "" >> ~/.bashrc
+    echo "" >> ~/.bashrc
 
 USER laradock
 
 RUN echo "" >> ~/.bashrc && \
     echo "# Load Custom Aliases" >> ~/.bashrc && \
     echo "source ~/aliases.sh" >> ~/.bashrc && \
-	  echo "" >> ~/.bashrc
+    echo "" >> ~/.bashrc
 
 ###########################################################################
 # Composer:
@@ -353,7 +382,7 @@ RUN if [ ${INSTALL_XDEBUG} = true ]; then \
   apt-get install -yqq pkg-config php-xml php${LARADOCK_PHP_VERSION}-xml && \
   if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] || { [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && { [ $(php -r "echo PHP_MINOR_VERSION;") = "4" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "3" ] ;} ;}; then \
     if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ]; then \
-      pecl install xdebug-3.4.1; \
+      pecl install xdebug-3.5.0; \
     else \
       pecl install xdebug-3.1.6; \
     fi; \
@@ -677,18 +706,16 @@ RUN if [ ${INSTALL_INOTIFY} = true ]; then \
 ###########################################################################
 
 ARG INSTALL_AST=false
-ARG AST_VERSION=1.0.10
-ENV AST_VERSION ${AST_VERSION}
 
 RUN if [ ${INSTALL_AST} = true ]; then \
-    # AST extension requires PHP 7.0.0 or newer
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") != "5" ]; then \
-        # Install AST extension
-        printf "\n" | pecl -q install ast-${AST_VERSION} && \
-        echo "extension=ast.so" >> /etc/php/${LARADOCK_PHP_VERSION}/mods-available/ast.ini && \
-        phpenmod -v ${LARADOCK_PHP_VERSION} -s cli ast \
-    ;fi \
-;fi
+    if [ "$(php -r 'echo PHP_VERSION_ID;')" -le 70100 ]; then \
+        printf "\n" | pecl -q install ast-1.0.16; \
+    else \
+        printf "\n" | pecl -q install ast; \
+    fi; \
+    echo "extension=ast.so" >> /etc/php/${LARADOCK_PHP_VERSION}/mods-available/ast.ini; \
+    phpenmod -v ${LARADOCK_PHP_VERSION} -s cli ast; \
+fi
 
 ###########################################################################
 # fswatch
@@ -720,7 +747,7 @@ RUN if [ ${INSTALL_GRAPHVIZ} = true ]; then \
 ARG INSTALL_IONCUBE=false
 
 RUN if [ ${INSTALL_IONCUBE} = true ]; then \
-    if [ ${LARADOCK_PHP_VERSION} != "8.4" ] \
+    if [ ${LARADOCK_PHP_VERSION} != "8.5" ] \
       && [ ${LARADOCK_PHP_VERSION} != "8.0" ]; then \
       # Install the php ioncube loader
       curl -L -o /tmp/ioncube_loaders_lin_x86-64.tar.gz https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
@@ -780,7 +807,7 @@ ENV NVM_NODEJS_ORG_MIRROR ${NVM_NODEJS_ORG_MIRROR}
 RUN if [ ${INSTALL_NODE} = true ]; then \
     # Install nvm (A Node Version Manager)
     mkdir -p $NVM_DIR && \
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash \
         && . $NVM_DIR/nvm.sh \
         && nvm install ${NODE_VERSION} \
         && nvm use ${NODE_VERSION} \
@@ -1045,7 +1072,7 @@ ARG INSTALL_LARAVEL_INSTALLER=false
 
 RUN if [ ${INSTALL_LARAVEL_INSTALLER} = true ]; then \
     # Install the Laravel Installer
-	composer global require "laravel/installer" \
+  composer global require "laravel/installer" \
 ;fi
 
 USER root
@@ -1132,7 +1159,7 @@ RUN set -eux; \
       #  https://github.com/Microsoft/msphpsql/wiki/Install-and-configuration
       ###########################################################################
       curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-      curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+      curl https://packages.microsoft.com/config/ubuntu/$( [ "$(lsb_release -rs)" = "24.04" ] && echo 22.04 || lsb_release -rs )/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
       apt-get update -yqq && \
       ACCEPT_EULA=Y apt-get install -yqq msodbcsql18 mssql-tools18 unixodbc unixodbc-dev libgss3 odbcinst locales && \
       ln -sfn /opt/mssql-tools/bin/sqlcmd /usr/bin/sqlcmd && \
@@ -1151,6 +1178,8 @@ RUN set -eux; \
         pecl install pdo_sqlsrv-5.10.1 sqlsrv-5.10.1 \
       ;elif [ $(php -r "echo PHP_VERSION_ID - PHP_RELEASE_VERSION;") = "80000" ]; then \
         pecl install pdo_sqlsrv-5.11.1 sqlsrv-5.11.1 \
+      ;elif [ $(php -r "echo PHP_MAJOR_VERSION;") = 8 ] && [ $(php -r "echo PHP_MINOR_VERSION;") -le 3 ]; then \
+        pecl install pdo_sqlsrv-5.12.0 sqlsrv-5.12.0 \
       ;else \
         pecl install pdo_sqlsrv sqlsrv \
       ;fi && \
@@ -1231,12 +1260,12 @@ RUN if [ ${INSTALL_PYTHON} = true ]; then \
 ARG INSTALL_PYTHON3=false
 
 RUN if [ ${INSTALL_PYTHON3} = true ]; then \
-  apt-get -y install python3 python3-dev build-essential \
-  && curl https://bootstrap.pypa.io/pip/3.8/get-pip.py -o get-pip.py \
-  && python3 get-pip.py \
-  && rm get-pip.py \
-  && python3 -m pip install --upgrade --force-reinstall pip \
-  && python3 -m pip install --upgrade virtualenv  \
+  apt-get -y install python3 python3-dev build-essential  \
+  && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py  \
+  && python3 get-pip.py --break-system-packages \
+  && rm get-pip.py  \
+  && python3 -m pip install --upgrade --force-reinstall pip --break-system-packages \
+  && python3 -m pip install --upgrade virtualenv --break-system-packages \
 ;fi
 
 ###########################################################################
@@ -1286,11 +1315,7 @@ RUN if [ ${INSTALL_IMAGEMAGICK} = true ]; then \
       apt-get install -y git && \
       cd /tmp && \
       if [ ${IMAGEMAGICK_VERSION} = "latest" ]; then \
-        if [ ${LARADOCK_PHP_VERSION} = "8.4" ]; then \
-          git clone --branch develop https://github.com/Imagick/imagick; \
-        else \
-          git clone https://github.com/Imagick/imagick; \
-        fi; \
+        git clone https://github.com/Imagick/imagick; \
       else \
         git clone --branch ${IMAGEMAGICK_VERSION} https://github.com/Imagick/imagick; \
       fi && \
@@ -1318,10 +1343,10 @@ ARG INSTALL_TERRAFORM=false
 
 RUN if [ ${INSTALL_TERRAFORM} = true ]; then \
     apt-get -yqq install sudo wget unzip \
-    && wget https://releases.hashicorp.com/terraform/0.10.6/terraform_0.10.6_linux_amd64.zip \
-    && unzip terraform_0.10.6_linux_amd64.zip \
+    && wget https://releases.hashicorp.com/terraform/1.13.3/terraform_1.13.3_linux_amd64.zip \
+    && unzip terraform_1.13.3_linux_amd64.zip \
     && mv terraform /usr/local/bin \
-    && rm terraform_0.10.6_linux_amd64.zip \
+    && rm terraform_1.13.3_linux_amd64.zip \
 ;fi
 
 ###########################################################################
@@ -1365,7 +1390,7 @@ ARG INSTALL_DUSK_DEPS=false
 
 RUN if [ ${INSTALL_DUSK_DEPS} = true ]; then \
   apt-get -y install zip wget unzip xdg-utils \
-    libxpm4 libxrender1 libgtk2.0-0 libnss3 libgconf-2-4 xvfb \
+    libxpm4 libxrender1 libgtk2.0-0 libnss3 xvfb \
     gtk2-engines-pixbuf xfonts-cyrillic xfonts-100dpi xfonts-75dpi \
     xfonts-base xfonts-scalable x11-apps \
     fonts-ipafont \
@@ -1531,7 +1556,7 @@ RUN if [ ${INSTALL_POPPLER_UTILS} = true ]; then \
 USER root
 
 ARG INSTALL_WKHTMLTOPDF=false
-ARG WKHTMLTOPDF_VERSION=0.12.6-1
+ARG WKHTMLTOPDF_VERSION=0.12.6.1-3
 
 RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
    ARCH=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
@@ -1546,8 +1571,8 @@ RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
    xfonts-base \
    xfonts-75dpi \
    wget \
-   && wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_${WKHTMLTOPDF_VERSION}.focal_${ARCH}.deb" \
-   && dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.focal_${ARCH}.deb" \
+   && wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_${WKHTMLTOPDF_VERSION}.jammy_${ARCH}.deb" \
+   && dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.jammy_${ARCH}.deb" \
    && apt -f install \
 ;fi
 
@@ -1701,7 +1726,7 @@ RUN if [ ${SHELL_OH_MY_ZSH} = true ]; then \
     echo "" >> ~/.zshrc && \
     echo "# Load Custom Aliases" >> ~/.zshrc && \
     echo "source ~/aliases.sh" >> ~/.zshrc && \
-	  echo "" >> ~/.zshrc \
+    echo "" >> ~/.zshrc \
 ;fi
 
 USER laradock
@@ -1710,7 +1735,7 @@ RUN if [ ${SHELL_OH_MY_ZSH} = true ]; then \
     echo "" >> ~/.zshrc && \
     echo "# Load Custom Aliases" >> ~/.zshrc && \
     echo "source ~/aliases.sh" >> ~/.zshrc && \
-	  echo "" >> ~/.zshrc \
+    echo "" >> ~/.zshrc \
 ;fi
 
 USER root
@@ -2137,6 +2162,36 @@ RUN set -eux \
         php8.4-bz2 \
         php8.4-soap \
         \
+        php8.5-cli \
+        php8.5-common \
+        php8.5-curl \
+        php8.5-intl \
+        php8.5-xml \
+        php8.5-mbstring \
+        php8.5-mysql \
+        php8.5-pgsql \
+        php8.5-sqlite3 \
+        php8.5-zip \
+        php8.5-bcmath \
+        php8.5-memcached \
+        php8.5-gd \
+        php8.5-dev \
+        php8.5-amqp \
+        php8.5-igbinary \
+        php8.5-redis \
+        php8.5-zmq \
+        php8.5-apcu \
+        php8.5-imagick \
+        php8.5-mailparse \
+        php8.5-pspell \
+        php8.5-xsl \
+        php8.5-imap \
+        php8.5-tidy \
+        php8.5-snmp \
+        php8.5-uuid \
+        php8.5-yaml \
+        php8.5-bz2 \
+        php8.5-soap \
         pkg-config \
         libcurl4-openssl-dev \
         libedit-dev \
