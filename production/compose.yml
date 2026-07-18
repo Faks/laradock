@@ -1,0 +1,52 @@
+# Laradock — production, single server.
+#
+#   ./laradock ship                                # build the self-contained image
+#   cp production/.env.example production/.env      # fill real values
+#   docker compose -f production/compose.yml up -d  # run it
+#
+# The app image serves HTTP itself (nginx + php-fpm inside), so this is just one
+# container. Point DB/REDIS at MANAGED services. Optional worker/scheduler are off
+# by default:
+#   docker compose -f production/compose.yml --profile worker --profile scheduler up -d
+
+name: ${APP_NAME:-laradock-app}
+
+services:
+  app:                                   # self-contained web image (built by ./laradock ship)
+    image: ${APP_IMAGE:-laradock-app:latest}
+    restart: always
+    env_file: .env
+    ports:
+      - "${HTTP_PORT:-80}:${PORT:-8080}"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:${PORT:-8080}/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    networks: [backend]
+
+  # --- optional: queue/messenger worker (Laravel/Symfony). Off unless --profile worker ---
+  worker:
+    image: ${APP_IMAGE:-laradock-app:latest}
+    restart: always
+    env_file: .env
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["${WORKER_COMMAND:-php artisan queue:work --tries=3 --timeout=90}"]
+    depends_on: [app]
+    networks: [backend]
+    profiles: [worker]
+
+  # --- optional: scheduler/cron (Laravel schedule, Moodle cron). Off unless --profile scheduler ---
+  # ponytail: naive 60s sleep loop. Precise cron? use the k8s CronJob or a host crontab.
+  scheduler:
+    image: ${APP_IMAGE:-laradock-app:latest}
+    restart: always
+    env_file: .env
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["while true; do ${SCHEDULER_COMMAND:-php artisan schedule:run}; sleep 60; done"]
+    depends_on: [app]
+    networks: [backend]
+    profiles: [scheduler]
+
+networks:
+  backend:

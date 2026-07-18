@@ -1,4 +1,4 @@
-FROM webdevops/apache:ubuntu-18.04
+FROM webdevops/apache:alpine
 
 LABEL maintainer="Eric Pfeiffer <computerfr33k@users.noreply.github.com>"
 
@@ -23,7 +23,7 @@ WORKDIR /var/www/
 
 COPY vhost.conf /etc/apache2/sites-enabled/vhost.conf
 
-ADD ./startup.sh /opt/startup.sh
+COPY ./startup.sh /opt/startup.sh
 
 ENTRYPOINT ["/opt/docker/bin/entrypoint.sh"]
 

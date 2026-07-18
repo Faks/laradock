@@ -23,6 +23,7 @@ RUN apk --update add wget \
   curl \
   git \
   build-base \
+  linux-headers \
   libmcrypt-dev \
   libxml2-dev \
   pcre-dev \
@@ -39,6 +40,24 @@ RUN apk --update add wget \
   else \
     apk --update add openssl-dev; \
   fi
+
+# pecl.php.net downloads intermittently truncate on CI (Fastly/HTTP flakiness), breaking
+# `pecl install` with "unable to unpack". Wrap pecl once so every install retries after clearing
+# the partial-download cache; all pecl call sites below become resilient with no other changes.
+RUN PECL_BIN="$(command -v pecl)"; \
+    mv "$PECL_BIN" "${PECL_BIN}.real"; \
+    printf '%s\n' \
+      '#!/bin/sh' \
+      'i=1' \
+      'while :; do' \
+      "  \"${PECL_BIN}.real\" \"\$@\" && exit 0" \
+      '  [ "$i" -ge 5 ] && exit 1' \
+      '  echo "pecl: attempt $i failed, clearing cache and retrying..." >&2' \
+      '  rm -rf /tmp/pear/download/* /tmp/pear/temp/* 2>/dev/null || true' \
+      '  i=$((i+1)); sleep 3' \
+      'done' \
+      > "$PECL_BIN"; \
+    chmod +x "$PECL_BIN"
 
 RUN pecl channel-update pecl.php.net; \
   docker-php-ext-install mysqli mbstring pdo pdo_mysql xml pcntl; \
@@ -77,6 +96,17 @@ RUN set -eux; if [ ${INSTALL_GNUPG} = true ]; then \
       pecl install gnupg; \
       docker-php-ext-enable gnupg; \
     fi
+
+# Install Intl:
+
+ARG INSTALL_INTL=false
+
+RUN if [ ${INSTALL_INTL} = true ]; then \
+    apk add icu-dev && \
+    docker-php-ext-configure intl && \
+    docker-php-ext-install intl && \
+    docker-php-ext-enable intl \
+;fi
 
 #Install LDAP
 ARG INSTALL_LDAP=false;
@@ -251,7 +281,10 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
         pecl install mongo; \
         docker-php-ext-enable mongo; \
       else \
-        pecl install mongodb; \
+        # pecl.php.net HTTP/2 is flaky on CI and its own downloader truncates; fetch over HTTP/1.1 with curl retries, then install the local file
+        curl -fSL --http1.1 --retry 5 --retry-delay 2 --retry-all-errors -o /tmp/mongodb.tgz "https://pecl.php.net/get/mongodb-1.21.0.tgz" && \
+        pecl install /tmp/mongodb.tgz && \
+        rm -f /tmp/mongodb.tgz; \
         docker-php-ext-enable mongodb; \
       fi; \
     fi

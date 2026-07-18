@@ -4,6 +4,9 @@
   "private": false,
   "scripts": {
     "start": "docusaurus start",
+    "prestart": "node scripts/generate-llms.js",
+    "generate-llms": "node scripts/generate-llms.js",
+    "prebuild": "node scripts/generate-llms.js",
     "deploy": "docusaurus build && gh-pages -d build",
     "docusaurus": "docusaurus",
     "build": "docusaurus build",
@@ -15,21 +18,27 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@sista/ai-assistant-react": "^3.3.21",
-    "@docusaurus/core": "3.3.0",
-    "@docusaurus/preset-classic": "3.3.0",
-    "@mdx-js/react": "^3.0.0",
+    "@docusaurus/core": "^3.10.2",
+    "@docusaurus/preset-classic": "^3.10.2",
+    "@docusaurus/theme-mermaid": "^3.10.2",
+    "@easyops-cn/docusaurus-search-local": "^0.55.2",
+    "@mdx-js/react": "^3.1.1",
     "clsx": "^2.0.0",
     "prism-react-renderer": "^2.3.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.3.0",
-    "@docusaurus/tsconfig": "3.3.0",
-    "@docusaurus/types": "3.3.0",
+    "@docusaurus/module-type-aliases": "^3.10.2",
+    "@docusaurus/tsconfig": "^3.10.2",
+    "@docusaurus/types": "^3.10.1",
     "gh-pages": "^6.1.1",
-    "typescript": "~5.2.2"
+    "typescript": "~7.0.2"
+  },
+  "resolutions": {
+    "js-yaml": "3.15.0",
+    "serialize-javascript": "7.0.5",
+    "uuid": "11.1.1"
   },
   "browserslist": {
     "production": [
@@ -45,5 +54,6 @@
   },
   "engines": {
     "node": ">=18.0"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }

@@ -1,0 +1,144 @@
+# Laradock — Kubernetes reference manifests (a STARTING POINT, not a distro).
+#
+# The app image serves HTTP itself, so this is one container per pod (no sidecar).
+#   ./laradock ship registry.example.com/you/app:1.0 --push
+#   kubectl create secret generic app-env --from-env-file=production/.env
+#   # set image: below to your pushed image, then:
+#   kubectl apply -f production/kubernetes.yaml
+#
+# DB/Redis are MANAGED services (in the Secret), NOT pods. Delete the worker /
+# scheduler / migrate blocks you don't need.
+---
+# App env. In real life create this from your .env:
+#   kubectl create secret generic app-env --from-env-file=production/.env
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-env
+type: Opaque
+stringData:
+  APP_ENV: production
+  APP_DEBUG: "false"
+  DB_HOST: your-managed-db-host
+  DB_DATABASE: app
+  DB_USERNAME: app
+  DB_PASSWORD: change-me
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: app } }
+  template:
+    metadata: { labels: { app: app } }
+    spec:
+      containers:
+        - name: app
+          image: myapp:latest            # <-- your pushed image (./laradock ship … --push)
+          ports: [{ containerPort: 8080 }]
+          envFrom: [{ secretRef: { name: app-env } }]
+          # generic probes; point them at a real /health route if you have one
+          readinessProbe: { tcpSocket: { port: 8080 }, initialDelaySeconds: 5 }
+          livenessProbe:  { tcpSocket: { port: 8080 }, initialDelaySeconds: 10 }
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits:   { cpu: 500m, memory: 512Mi }
+          # --- uploads/persistent files? uncomment (WordPress, Moodle). See PVC at bottom. ---
+          # volumeMounts: [{ name: storage, mountPath: /var/www/storage }]
+      # volumes: [{ name: storage, persistentVolumeClaim: { claimName: app-storage } }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+spec:
+  selector: { app: app }
+  ports: [{ port: 80, targetPort: 8080 }]
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app
+  annotations:
+    # TLS via cert-manager (install it, then set your issuer):
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [example.com]
+      secretName: app-tls        # cert-manager fills this in
+  rules:
+    - host: example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: { service: { name: app, port: { number: 80 } } }
+---
+# --- OPTIONAL: queue/messenger worker (Laravel/Symfony). Delete if unused. ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: worker } }
+  template:
+    metadata: { labels: { app: worker } }
+    spec:
+      containers:
+        - name: worker
+          image: myapp:latest
+          command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=90"]
+          envFrom: [{ secretRef: { name: app-env } }]
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits:   { cpu: 500m, memory: 512Mi }
+---
+# --- OPTIONAL: scheduler/cron (Laravel schedule, Moodle cron). Delete if unused. ---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: scheduler
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: scheduler
+              image: myapp:latest
+              command: ["php", "artisan", "schedule:run"]
+              envFrom: [{ secretRef: { name: app-env } }]
+---
+# --- OPTIONAL: run DB migrations once per deploy (Laravel/Symfony/Doctrine). ---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: myapp:latest
+          command: ["php", "artisan", "migrate", "--force"]
+          envFrom: [{ secretRef: { name: app-env } }]
+---
+# --- OPTIONAL: persistent uploads (WordPress wp-content, Moodle moodledata). ---
+# Block storage is ReadWriteOnce: with replicas > 1 you need a ReadWriteMany class
+# (EFS / Filestore / Azure Files) or, better, push uploads to S3-compatible storage.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-storage
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: { requests: { storage: 10Gi } }

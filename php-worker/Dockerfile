@@ -41,6 +41,24 @@ RUN apk --update add wget \
   fi
 
 
+# pecl.php.net downloads intermittently truncate on CI (Fastly/HTTP flakiness), breaking
+# `pecl install` with "unable to unpack". Wrap pecl once so every install retries after clearing
+# the partial-download cache; all pecl call sites below become resilient with no other changes.
+RUN PECL_BIN="$(command -v pecl)"; \
+    mv "$PECL_BIN" "${PECL_BIN}.real"; \
+    printf '%s\n' \
+      '#!/bin/sh' \
+      'i=1' \
+      'while :; do' \
+      "  \"${PECL_BIN}.real\" \"\$@\" && exit 0" \
+      '  [ "$i" -ge 5 ] && exit 1' \
+      '  echo "pecl: attempt $i failed, clearing cache and retrying..." >&2' \
+      '  rm -rf /tmp/pear/download/* /tmp/pear/temp/* 2>/dev/null || true' \
+      '  i=$((i+1)); sleep 3' \
+      'done' \
+      > "$PECL_BIN"; \
+    chmod +x "$PECL_BIN"
+
 RUN pecl channel-update pecl.php.net; \
   docker-php-ext-install mysqli mbstring pdo pdo_mysql xml pcntl; \
   if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] && \
@@ -166,21 +184,25 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
     else \
       if [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ]; then \
         if [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "1" ]; then \
-          pecl install mongodb-1.9.2; \
+          MONGO_VERSION=1.9.2; \
         else \
           if [ $(php -r "echo PHP_MINOR_VERSION;") = "4" ]; then \
-            pecl install mongodb-1.20.1; \
+            MONGO_VERSION=1.20.1; \
           else \
-            pecl install mongodb-1.16.2; \
+            MONGO_VERSION=1.16.2; \
           fi; \
         fi; \
       else \
         if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] && [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
-            pecl install mongodb-1.20.1; \
+            MONGO_VERSION=1.20.1; \
         else \
-            pecl install mongodb; \
+            MONGO_VERSION=1.21.0; \
         fi; \
       fi; \
+      # pecl.php.net HTTP/2 is flaky on CI and its own downloader truncates; fetch over HTTP/1.1 with curl retries, then install the local file
+      curl -fSL --http1.1 --retry 5 --retry-delay 2 --retry-all-errors -o /tmp/mongodb.tgz "https://pecl.php.net/get/mongodb-${MONGO_VERSION}.tgz" && \
+      pecl install /tmp/mongodb.tgz && \
+      rm -f /tmp/mongodb.tgz; \
       docker-php-ext-enable mongodb; \
       php -m | grep -oiE '^mongodb$'; \
     fi; \

@@ -1,237 +1,267 @@
 ---
 sidebar_position: 2
 title: Getting Started
+description: Install Laradock and get a full Dockerized PHP stack running in minutes. Step-by-step setup for new and existing projects, single or multiple apps, on Linux, macOS, and Windows.
+keywords:
+  - laradock installation
+  - laradock setup
+  - install laradock
+  - docker php setup
+  - laravel docker install
 ---
+
+This guide gets Laradock running for your project. The fastest path is the **Laradock CLI**, a short wizard that sets everything up for you, so start there. If you would rather wire things up by hand with plain `docker compose`, see [Manual setup](/docs/manual-setup), it is meant for advanced users who want full control.
+
+{/* SYNC: keep this tip identical in docs/Intro.md and docs/getting-started.md */}
+:::tip[Let AI use it]
+Three ways to point your AI assistant at Laradock:
+
+- **Run it for you** - the repo ships agent instructions ([`AGENTS.md`](https://github.com/laradock/laradock/blob/master/AGENTS.md) + rule files for [Claude Code](https://claude.com/claude-code), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [Cursor](https://cursor.com), [Cline](https://cline.bot), and [Windsurf](https://windsurf.com)). Open the repo in your agent and say *"Set up Laradock for this project."*
+- **Ask about it, no clone** - add the docs as an MCP server: `https://gitmcp.io/laradock/laradock`.
+- **Read a walkthrough** - browse the AI-generated overview on [DeepWiki](https://deepwiki.com/laradock/laradock), starting with its [architecture diagram](https://deepwiki.com/laradock/laradock/1-overview-of-laradock#system-architecture).
+:::
+
+**Building something specific?** Jump straight to a guide tailored to the most popular platforms:
+
+<div className="install-grid">
+  <a href="/docs/laravel-on-docker">Laravel</a>
+  <a href="/docs/wordpress-on-docker">WordPress</a>
+  <a href="/docs/symfony-on-docker">Symfony</a>
+  <a href="/docs/drupal-on-docker">Drupal</a>
+  <a href="/docs/magento-on-docker">Magento</a>
+  <a href="/docs/woocommerce-on-docker">WooCommerce</a>
+  <a href="/docs/moodle-on-docker">Moodle</a>
+  <a href="/docs/codeigniter-on-docker">CodeIgniter</a>
+  <a href="/docs/nextcloud-on-docker">Nextcloud</a>
+  <a href="/docs/prestashop-on-docker">PrestaShop</a>
+</div>
+
+Not one of these? Browse the [full list of 100+ supported projects](/docs/Intro#supported-php-projects), then follow its guide. Otherwise the generic steps below work for any PHP app.
 
 ## Requirements
 
 - [Git](https://git-scm.com/downloads)
-- [Docker](https://www.docker.com/products/docker-desktop/) [ >= 19.03.0 ]
+- [Docker](https://www.docker.com/products/docker-desktop/) (with Docker Compose v2.20 or newer)
 
+## Get started with CLI {#get-started}
 
-
-
-## Installation
-
-Choose the setup the best suits your needs.
-
-- [A) Setup for Single Project](#A)
-	- [A.1) Already have a PHP project](#A1)
- 	- [A.2) Don't have a PHP project yet](#A2)
-- [B) Setup for Multiple Projects](#B)
-
-
-<a name="A"></a>
-### A) Setup for Single Project
-> (Follow these steps if you want a separate Docker environment for each project)
-
-
-<a name="A1"></a>
-### A.1) Already have a PHP project:
-
-1 - Clone laradock on your project root directory:
-
-```bash
-git submodule add https://github.com/Laradock/laradock.git
-```
-
-Note: If you are not using Git yet for your project, you can use `git clone` instead of `git submodule `.
-
-*To keep track of your Laradock changes, between your projects and also keep Laradock updated [check these docs](/docs/usage#track-your-laradock-changes)*
-
-
-2 - Make sure your folder structure should look like this:
-
-```
-* project-a
-*   laradock-a
-* project-b
-*   laradock-b
-```
-
-*(It's important to rename the laradock folders to unique name in each project, if you want to run laradock per project).*
-
-3 - Go to the [Usage](#Usage) section.
-
-<a name="A2"></a>
-### A.2) Don't have a PHP project yet:
-
-1 - Clone this repository anywhere on your machine:
+1 - Clone Laradock inside your PHP project (or anywhere, if you don't have one yet):
 
 ```bash
 git clone https://github.com/laradock/laradock.git
+cd laradock
 ```
 
-Your folder structure should look like this:
-
-```
-* laradock
-* project-z
-```
-
-2 - Edit your web server sites configuration.
-
-We'll need to do step 1 of the [Usage](#Usage) section now to make this happen.
-
-```
-cp .env.example .env
-```
-
-At the top, change the `APP_CODE_PATH_HOST` variable to your project path.
-
-```
-APP_CODE_PATH_HOST=../project-z/
-```
-
-Make sure to replace `project-z` with your project folder name.
-
-3 - Go to the [Usage](#Usage) section.
-
-
-<a name="B"></a>
-### B) Setup for Multiple Projects:
-> (Follow these steps if you want a single Docker environment for all your projects)
-
-1 - Clone this repository anywhere on your machine (similar to [Steps A.2. from above](#A2)):
+2 - Start your stack:
 
 ```bash
-git clone https://github.com/laradock/laradock.git
+./laradock start
 ```
 
-Your folder structure should look like this:
+On the **first run**, `start` walks you through a short setup wizard: it detects your framework and lets you pick your project, PHP version, and services (web server, database, cache), everything pre-answered, then points your app's `.env` at those services, starts the stack, and prints its URLs and credentials. After that, `./laradock start` just starts and reprints them. Re-run the wizard any time with `./laradock setup`.
 
-```
-* laradock
-* project-1
-* project-2
-```
-
-Make sure the `APP_CODE_PATH_HOST` variable points to parent directory.
-
-```
-APP_CODE_PATH_HOST=../
-```
-
-2 - Go to your web server and create config files to point to different project directory when visiting different domains:
-
-For **Nginx** go to `nginx/sites`, for **Apache2** `apache2/sites`. 
-
-Laradock by default includes some sample files for you to copy `app.conf.example`, `laravel.conf.example` and `symfony.conf.example`.
-
-3 - change the default names `*.conf`:
-
-You can rename the config files, project folders and domains as you like, just make sure the `root` in the config files, is pointing to the correct project folder name.
-
-4 - Add the domains to the **hosts** files.
-
-```
-127.0.0.1  project-1.test
-127.0.0.1  project-2.test
-...
-```
-
-If you use Chrome 63 or above for development, don't use `.dev`. [Why?](https://laravel-news.com/chrome-63-now-forces-dev-domains-https). Instead use `.localhost`, `.invalid`, `.test`, or `.example`.
-
-4 - Go to the [Usage](#Usage) section.
-
-
-
-
-
-
-
-<a name="Usage"></a>
-## Usage
-
-**Read Before starting:**
-
-If you are using **Docker Toolbox** (VM), do one of the following:
-
-- Upgrade to [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Mac/Windows (Recommended). Check out [Upgrading Laradock](/docs/usage/#upgrading-laradock)
-- Use Laradock v3.\*. Visit the [Laradock-ToolBox](https://github.com/laradock/laradock/tree/LaraDock-ToolBox) branch. *(outdated)*
-
-<br/>
-
-We recommend using a Docker Engine version which is newer than 19.03.0.
-
-<br/>
-
->**Warning:** If you used an older version of Laradock it's highly recommended to rebuild the containers you need to use [see how you rebuild a container](/docs/usage/#Build-Re-build-Containers) in order to prevent as much errors as possible.
-
-<br/>
-
-1 - Enter the laradock folder and copy `.env.example` to `.env`
-
-```shell
-cp .env.example .env
-```
-
-You can edit the `.env` file to choose which software's you want to be installed in your environment. You can always refer to the `docker-compose.yml` file to see how those variables are being used.
-
-Depending on the host's operating system you may need to change the value given to `COMPOSE_FILE`. When you are running Laradock on Mac OS the correct file separator to use is `:`. When running Laradock from a Windows environment multiple files must be separated with `;`.
-
-By default the containers that will be created have the current directory name as suffix (e.g. `laradock_workspace_1`). This can cause mixture of data inside the container volumes if you use laradock in multiple projects. In this case, either read the guide for [multiple projects](#B) or change the variable `COMPOSE_PROJECT_NAME` to something unique like your project name.
-
-2 - Build the environment and run it using `docker-compose`
-
-In this example we'll see how to run NGINX (web server) and MySQL (database engine) to host a PHP Web Scripts:
+3 - Enter the workspace, a dev shell with `php`, `composer`, `node`, and `git` inside:
 
 ```bash
-docker-compose up -d nginx mysql
+./laradock workspace
 ```
 
-**Note**: All the web server containers `nginx`, `apache` ..etc depends on `php-fpm`, which means if you run any of them, they will automatically launch the `php-fpm` container for you, so no need to explicitly specify it in the `up` command. If you have to do so, you may need to run them as follows: `docker-compose up -d nginx php-fpm mysql`.
+4 - Open [http://localhost](http://localhost). Done.
 
+:::tip[Where do I run `artisan`, `composer`, `npm`?]
+Inside the workspace container, not on your machine. Enter it once with `./laradock workspace` and run commands from there, or prefix a single one: `./laradock exec workspace php artisan migrate`.
+:::
 
-You can select your own combination of containers from [this list](https://laradock.io/introduction/#supported-software-docker-images).
+The CLI hides nothing: it prints every real `docker compose` command it runs, keeps no state, and only ever writes your `.env`. Unknown commands pass straight through (`./laradock logs -f nginx` runs `docker compose logs -f nginx`). Full reference: [The Laradock CLI](/docs/cli).
 
-*(Please note that sometimes we forget to update the docs, so check the `docker-compose.yml` file to see an updated list of all available containers).*
+## How it works
 
+### The stack
 
-<br/>
-3 - Enter the Workspace container, to execute commands like (Artisan, Composer, PHPUnit, Gulp, ...)
+Here is the whole picture from where you sit. You work two ways: open your app in a **browser** (Nginx serves it through PHP-FPM), or drop into the **Workspace** terminal to run `artisan`, `composer`, `npm`. Both act on the **same codebase**, mounted straight from your machine. Your code talks to whatever **services** you switch on, add as many as you need, and the same setup ships to production. Click any node to open its source.
 
-```bash
-docker-compose exec workspace bash
+```mermaid
+flowchart LR
+  you(["You<br/>(your machine)"])
+
+  subgraph docker["Laradock &middot; your containers on Docker"]
+    direction TB
+    nginx["Nginx<br/>web server"]
+    php["PHP-FPM<br/>runs your PHP"]
+    workspace["Workspace<br/>terminal: php, composer, node, git"]
+    code[/"Your codebase<br/>mounted from your machine"/]
+
+    subgraph services["Switch on the services you need"]
+      direction LR
+      db[("Database<br/>(MySQL)")]
+      cache[("Cache<br/>(Redis)")]
+      queue["Queue<br/>(RabbitMQ)"]
+      search[("Search<br/>(Meilisearch)")]
+      ai["Local AI<br/>(Ollama)"]
+      more["&hellip;100+ more"]
+    end
+  end
+
+  ship["Ship to production<br/>any server / cloud"]
+
+  you -->|"in your browser"| nginx
+  you -->|"in your terminal"| workspace
+  nginx -->|"FastCGI"| php
+  php -->|"executes"| code
+  workspace -->|"develops"| code
+  code -.-> db
+  code -.-> cache
+  code -.-> queue
+  code -.-> search
+  code -.-> ai
+  code -.-> more
+  docker -->|"./laradock ship"| ship
+
+  click nginx "https://github.com/laradock/laradock/blob/master/nginx/compose.yml"
+  click php "https://github.com/laradock/laradock/tree/master/php-fpm/Dockerfile"
+  click workspace "https://github.com/laradock/laradock/blob/master/workspace/compose.yml"
+  click more "/docs/Intro#supported-services"
+  click ship "/docs/production"
+
+  classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+  classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
+  classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
+  classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
+  class you toneBlue
+  class nginx,php,workspace toneAmber
+  class code toneRose
+  class db,cache,queue,search,ai,more toneMint
+  class ship toneBlue
 ```
 
-*Alternatively, for Windows PowerShell users: execute the following command to enter any running container:*
+Solid arrows are how you drive it; dashed arrows are the optional services your code uses. Each service is its own container, switch them on and off per project and they never conflict, and add as many as you like from the [100+ available](/docs/Intro#supported-services).
 
-```bash
-docker exec -it {workspace-container-id} bash
+### How Laradock configuration works
+
+- Your `.env` (created on first run, or `cp .env.example .env` by hand) holds the **shared settings**: paths, PHP version, project name.
+- Each service keeps its **own settings** pre-filled in its folder: `mysql/defaults.env`, `nginx/defaults.env`, and so on. You never need to copy or edit those files, they work out of the box.
+- To change **any** setting, shared or per-service, add that line to your `.env` with your value. **Your `.env` always wins over every `defaults.env`.** For example, to run MySQL on another port, add `MYSQL_PORT=3307` to your `.env`.
+- To discover what a service lets you configure, open its folder's `defaults.env`, it's a short, readable list.
+- **Upgrading from an older Laradock?** Your existing full `.env` keeps working exactly as before, no changes needed.
+
+:::warning One exception: database passwords are set on first run only
+`MYSQL_PASSWORD`, `POSTGRES_PASSWORD`, and the other database credentials are applied the **first time** that database starts, when it creates its data files on disk. Changing them in `.env` later (even with `./laradock rebuild`) does **not** update an existing database; the old password keeps working. To change a database password for real, either run the change inside the database itself (for example `ALTER USER`), or delete that service's data folder under `DATA_PATH_HOST` so it initializes fresh (this erases that database's data).
+:::
+
+### How a request flows
+
+Here is what actually happens when a browser hits your app: Nginx hands the request to PHP-FPM, which runs your code and talks to whichever services you enabled, then hands the response back. Anything you queue is passed to the worker and finishes in the background.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Browser
+  participant Nginx
+  participant PHP as PHP-FPM
+  participant DB as Database (MySQL)
+  participant Cache as Cache (Redis)
+  participant Worker as PHP worker
+
+  Browser->>Nginx: HTTP request
+  Nginx->>PHP: FastCGI (runs your code)
+  PHP->>DB: query data
+  DB-->>PHP: rows
+  PHP->>Cache: read / write cache
+  Cache-->>PHP: value
+  PHP->>Cache: push queued job
+  PHP-->>Nginx: response
+  Nginx-->>Browser: HTML
+  Cache-->>Worker: deliver job
+  Worker->>DB: process in background
 ```
 
-**Note:** You can add `--user=laradock` to have files created as your host's user. Example: 
+The database and cache here are whatever you enabled (Postgres, Valkey, and so on): the shape stays the same.
 
-```shell
-docker-compose exec --user=laradock workspace bash
+### How the repository is organized
+
+One folder per service, and everything about a service lives in its folder:
+
+```
+laradock/
+├── docker-compose.yml      # the service catalog: shared networks/volumes + include list
+├── .env.example            # shared settings template (copy to .env)
+├── mysql/
+│   ├── compose.yml         # mysql's container definition
+│   ├── defaults.env        # mysql's settings, pre-filled
+│   └── Dockerfile          # mysql's image
+├── nginx/
+│   ├── compose.yml
+│   ├── defaults.env
+│   ├── Dockerfile
+│   └── sites/              # your site configs
+└── ...                     # ~100 more services, same pattern
 ```
 
-*You can change the PUID (User id) and PGID (group id) variables from the `.env` file)*
+So when you want to:
 
-<br/>
-4 - Update your project configuration to use the database host
+| You want to... | Edit... |
+|---|---|
+| Change any setting (port, version, password, flag) | your `.env` (add one line, it wins) |
+| See what a service lets you configure | `<service>/defaults.env` (read-only for you) |
+| Change a container's structure (mounts, links, ...) | `<service>/compose.yml` |
+| Change how an image is built | `<service>/Dockerfile`, then rebuild |
 
-Open your PHP project's `.env` file or whichever configuration file you are reading from, and set the database host `DB_HOST` to `mysql`:
+The root `docker-compose.yml` pulls every service in via Compose `include`, which requires Docker Compose v2.20 or newer. Every top-level folder in the repo is a runnable container, so the folder list is always the up-to-date list of [available services](/docs/Intro#supported-services).
 
-```env
-DB_HOST=mysql
+### How networking works
+
+Containers sit on two Docker networks. The **web server** faces the outside on the `frontend` network; **everything else** (PHP-FPM, your database, cache, queue, search, and the background worker) lives on the `backend` network, out of reach from outside. The web server bridges the two so it can pass requests through to PHP-FPM.
+
+```mermaid
+flowchart LR
+  browser["Client browser"]
+
+  subgraph frontend["frontend network"]
+    web["Web server<br/>(Nginx / Apache)"]
+  end
+
+  subgraph backend["backend network"]
+    php["PHP-FPM<br/>(your code)"]
+    db[("Database<br/>(MySQL)")]
+    cache[("Cache<br/>(Redis)")]
+    broker["Message broker<br/>(RabbitMQ)"]
+    search[("Search<br/>(Meilisearch)")]
+    worker["Worker<br/>(background jobs)"]
+  end
+
+  browser -->|"published ports"| web
+  web -->|"FastCGI"| php
+  php --> db
+  php --> cache
+  php --> broker
+  php --> search
+  broker -.->|"jobs"| worker
+  worker -.-> db
+
+  click web "https://github.com/laradock/laradock/blob/master/nginx/compose.yml"
+  click php "https://github.com/laradock/laradock/blob/master/php-fpm/compose.yml"
+  click db "https://github.com/laradock/laradock/blob/master/mysql/compose.yml"
+  click cache "https://github.com/laradock/laradock/blob/master/redis/compose.yml"
+  click broker "https://github.com/laradock/laradock/blob/master/rabbitmq/compose.yml"
+  click search "https://github.com/laradock/laradock/blob/master/meilisearch/compose.yml"
+  click worker "https://github.com/laradock/laradock/blob/master/php-worker/compose.yml"
+
+  classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
+  classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
+  class web,php,worker toneAmber
+  class db,cache,broker,search toneMint
 ```
 
-You need to use the Laradock's default DB credentials which can be found in the `.env` file (ex: `MYSQL_USER=`). 
-Or you can change them and rebuild the container.  
+The browser reaches the web server through **published ports**, not a Docker network. Switch the driver for both networks with `NETWORKS_DRIVER` in your `.env`. More: [Networking](/docs/networking).
 
-*If you want to install Laravel as PHP project, see [How to Install Laravel in a Docker Container](#Install-Laravel).*
+## Running multiple projects
 
-<br/>
-5 - Open your browser and visit your localhost address. 
+One Laradock can serve one project, or many. Run an **isolated** Laradock per project (separate containers and data), or serve **several sites from one** Laradock with a web-server config each. Different PHP versions per project are supported too.
 
-Make sure you add use the right port number as provided by your running server.
+→ Full guide: [Running Multiple Projects](/docs/multiple-projects) · [Multiple PHP Versions](/docs/multiple-php-versions)
 
-[http://localhost](http://localhost)
+## Manual setup (advanced, full control) {#manual-setup}
 
-If you followed the multiple projects setup, you can visit `http://project-1.test/` and `http://project-2.test/`.
+Rather wire things up by hand? Everything the CLI does, you can do with plain `docker compose`, same files, same result. It's the path for advanced users who want full control over exactly which containers run and how they're configured.
 
-
-
- 
+→ Full guide: [Manual Setup (without the CLI)](/docs/manual-setup)
