@@ -1,0 +1,20 @@
+# Main Caddyfile - Imports configurations
+{
+    servers  {
+        trusted_proxies static private_ranges
+    }
+
+    http_port 80
+    https_port 443
+}
+
+# Import reusable snippets first (so they are defined before being used)
+import snippets/*.caddy
+
+# Import all site configurations from the sites directory
+import sites/infrastructure/*.caddy
+import sites/development/*.caddy
+import sites/staging/*.caddy
+import sites/production/*.caddy
+
+# You can add other global directives here if needed, outside of site blocks.

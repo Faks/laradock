@@ -1,0 +1,48 @@
+# Caddy Snippets for staging PHP-FPM Versions
+# ----------------------------------------------------------------------
+# Defines reusable snippets for connecting to different PHP-FPM services
+
+# PHP 5.6
+(php_56_staging) {
+    php_fastcgi php-fpm-56-staging:9000
+}
+
+# PHP 7.4
+(php_74_staging) {
+    php_fastcgi php-fpm-74-staging:9000
+}
+
+# PHP 8.0
+(php_80_staging) {
+    php_fastcgi php-fpm-80-staging:9000
+}
+
+# PHP 8.1
+(php_81_staging) {
+    php_fastcgi php-fpm-81-staging:9000
+}
+
+# PHP 8.2
+(php_82_staging) {
+    php_fastcgi php-fpm-82-staging:9000
+}
+
+# PHP 8.3
+(php_83_staging) {
+    php_fastcgi php-fpm-83-staging:9000
+}
+
+# PHP 8.4
+(php_84_staging) {
+    php_fastcgi php-fpm-84-staging:9000
+}
+
+# PHP 8.5
+(php_85_staging) {
+    php_fastcgi php-fpm-85-staging:9000
+}
+
+# PHP 8.6
+(php_86_staging) {
+    php_fastcgi php-fpm-86-staging:9000
+}

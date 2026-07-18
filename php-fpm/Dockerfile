@@ -61,7 +61,7 @@ RUN PECL_BIN="$(command -v pecl)"; \
 
 # always run apt update when start and after add new source list, then clean up at end.
 RUN set -xe; \
-    apt-get update -yqq && \
+    apt-get update -yqq --allow-releaseinfo-change && \
     pecl channel-update pecl.php.net && \
     apt-get install -yqq \
       apt-utils \
